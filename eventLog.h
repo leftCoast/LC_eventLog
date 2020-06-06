@@ -29,8 +29,12 @@ time clock would be a neat addition.
 But not today.
 
 As of..
-5/18/2020 : Untested. Heck, I don't think its even been compiled.
-
+ 5/18/2020 : Untested. Heck, I don't think its even been compiled.
+ 
+ 6/ 5/2020 : It works! Amazing! Broke it out into its own repository so people can get at
+it. Needs some accounting for multiple sessions running concurrently. Basically it doesn't
+know if a session is running or not. So, if they all get shut down, the clock keeps trying
+to run. But I think I'll not worry about it 'till it becomes a problem.
 */
 
 #include "Arduino.h"
@@ -39,21 +43,22 @@ As of..
 #include	"idlers.h"
 
 
-#define	EVENTLOG_MS	1000	// 1000 gives us a "seconds" field as seconds. Adjust for different units.
+#define	EVENTLOG_MS	1000	// 1000 gives us a "seconds" field as seconds.
 
 
 class eventLog	:	public idler {
 
 	public:
-				eventLog(void);
+				eventLog(void);						// #1) Create your event logging object.
 	virtual	~eventLog(void);
 	
-	virtual	bool	begin(char* path);
-	virtual	int	findSeries(void);
-	virtual	void	setLogging(bool offOn);
+	virtual	bool	begin(char* path);			// #2) Initialize up with a full path to your logging file.
+	virtual	void	setLogging(bool offOn);		// #3) Start logging. (Defaults to NOT logging.)
+	virtual	bool	addEvent(char* eventTxt);	// #4) Add your events.
+	
 	virtual	bool	getLogging(void);
-	virtual	bool	addEvent(char* eventTxt);
 	virtual	void	deleteFile(void);
+	virtual	int	findSeries(void);
 	virtual	void	idle(void);
 				const char*	getPath(void);
 	private:
