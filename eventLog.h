@@ -52,9 +52,9 @@ class eventLog	:	public idler {
 				eventLog(void);						// #1) Create your event logging object.
 	virtual	~eventLog(void);
 	
-	virtual	bool	begin(char* path);			// #2) Initialize up with a full path to your logging file.
-	virtual	void	setLogging(bool offOn);		// #3) Start logging. (Defaults to NOT logging.)
-	virtual	bool	addEvent(char* eventTxt);	// #4) Add your events.
+	virtual	bool	begin(const char* path);			// #2) Initialize up with a full path to your logging file.
+	virtual	void	setLogging(bool offOn);				// #3) Start logging. (Defaults to NOT logging.)
+	virtual	bool	addEvent(const char* eventTxt);	// #4) Add your events.
 	
 	virtual	bool	getLogging(void);
 	virtual	void	deleteFile(void);

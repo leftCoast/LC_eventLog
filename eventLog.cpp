@@ -1,12 +1,10 @@
-#include "eventLog.h"
-#include "resizeBuff.h"
-
-
+#include <eventLog.h>
+#include <resizeBuff.h>
+#include <strTools.h>
 
 timeObj	gTimer(EVENTLOG_MS);	// A global second timer, so that all logfiles will have a single
-int		gSec		= 0;			// Time index. Like the click of a movie clapperboard.
-bool		gStarted	= false;		// Has anyone called gStartTimer() yet?
-
+int		gSec			= 0;					// Time index. Like the click of a movie clapperboard.
+bool	gStarted	= false;			// Has anyone called gStartTimer() yet?
 
 
 // First successful call of begin() calls this. It sets up the globals and starts the
@@ -27,29 +25,29 @@ eventLog::eventLog(void) {
 }
 
 
-eventLog::~eventLog(void) { if (mPath) resizeBuff(0,&mPath); }
+eventLog::~eventLog(void) { if (mPath) freeStr(&mPath); }
 
 
-// Program is up and running.Here's where we see if all this might work. Valid file path.
+// Program is up and running. Here's where we see if all this works. Valid file path?
 // Check to see if the SD drive is running. Also fires up the second timer for everyone.
-bool eventLog::begin(char* path) {
+bool eventLog::begin(const char* path) {
 
-	File	logFile;
+	File	testFile;
 	
-	mReady = false;										// Just in case, we ain't ready.
-	if (path) {												// Sanity, if they gave us a non-null string;
-		if (resizeBuff(strlen(path)+1,&mPath)) {	// If we got the RAM to store the path string..
-			strcpy(mPath,path);							// Copy the path.
-			logFile = SD.open(mPath, FILE_WRITE);  // Lets try to open/create the logfile.
-			if (logFile) {									// If we had success..
-				logFile.close();                    // Close the file.
-				hookup();									// Hookup to the idler's list.
-				if (!gStarted) gStartTimer();			// First one to begin, fires off the initializer function.
-        		mReady = true;  							// Flag we're up and running.
-        	}             			
-		}
-	}
-	return mReady;											// And tell the world!
+	mReady = false;														// Just in case, we ain't ready.
+	heapStr(&mPath,path);											// Make local copy of our path string.
+	if (mPath) {															// If we got the RAM to store the path string..
+		testFile = SD.open(mPath, FILE_WRITE);	// Lets try to open/create the logfile.
+		if (testFile) {													// If we had success..
+			testFile.close();											// Close the file.
+			hookup();															// Hookup to the idler's list.
+			if (!gStarted) {											// If we've not started.. Huh?
+				gStartTimer();											// First one to begin, fires off the initializer function.
+				mReady = true;											// Flag we're up and running.
+			}																			//
+		}																				//
+	}																					//
+	return mReady;														// And tell the world!
 }
 
 
@@ -134,7 +132,7 @@ bool eventLog::getLogging(void) {
 // Add a bit of data. This will start it with a series number then seconds index. All data
 // is separated by tabs and it should to readable text. Events ends with an EOL character.
 // If you want a header, it would be best in inherit this and add that first if the filesize is 0.
-bool eventLog::addEvent(char* eventTxt) {
+bool eventLog::addEvent(const char* eventTxt) {
 	
 	File	logFile;
 	bool	success;
@@ -182,8 +180,8 @@ const char* eventLog::getPath(void) { return mPath; }
 // Idle time, everyone checks the timer.
 void eventLog::idle(void) {
 
-	if (gTimer.ding()) {		// If the timer has expired..
-		gSec++;					// Bump the timer.
+	if (gTimer.ding()) {	// If the timer has expired..
+		gSec++;							// Bump the timer.
 		gTimer.stepTime();	// restart the timer.
 	}
 }
